@@ -1,0 +1,23 @@
+# Worker Lambda: no bucket, no CloudFront, no API Gateway.
+# Triggered by an EventBridge schedule, an EventBridge event pattern and an SNS topic.
+app_name: order-worker
+environment: dev
+owner_team: backend-devs
+topics:
+  orders:
+    topic_name: order-worker-topic
+lambdas:
+  worker:
+    function_name: order-worker
+    entry_point_dir: src/worker_lambda
+    memory_mb: 256
+    timeout_seconds: 60
+    triggers:
+      schedule:
+        expression: rate(1 hour)
+      event_rule:
+        source: [orders.service]
+        detail_type: [Order Created]
+      sns: [orders]            # keys from `topics`
+api_gateway:
+  enable_proxy: false

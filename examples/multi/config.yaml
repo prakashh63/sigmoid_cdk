@@ -1,0 +1,55 @@
+# Several Lambdas, several buckets and one shared SNS topic in ONE stack.
+#
+#   CloudFront  /            -> website bucket
+#               /assets/*    -> assets bucket   (objects must live under the 'assets/' prefix)
+#               /api/*       -> API Gateway
+#   API Gateway /api/users   -> users Lambda
+#               /api/reports -> reports Lambda
+#   order-worker has no API route: it only listens to the 'orders' topic.
+app_name: portal-suite
+environment: dev
+owner_team: platform
+cost_center: CC-2048
+
+buckets:                       # bucket names must be globally unique if you deploy
+  website:
+    bucket_name: portal-suite-web-dev
+    cdn_default: true
+  assets:
+    bucket_name: portal-suite-assets-dev
+    cdn_path: /assets/*
+  uploads:                     # private data bucket, not behind CloudFront
+    bucket_name: portal-suite-uploads-dev
+
+topics:
+  orders:
+    topic_name: portal-suite-orders
+
+lambdas:
+  users:
+    function_name: portal-users-fn
+    entry_point_dir: src/users
+    bucket_access:
+      uploads: read_write      # injects env var BUCKET_UPLOADS
+  reports:
+    function_name: portal-reports-fn
+    entry_point_dir: src/reports
+    bucket_access:
+      uploads: read
+    triggers:
+      schedule:
+        expression: rate(1 day)
+  order-worker:
+    function_name: portal-order-worker
+    entry_point_dir: src/worker
+    memory_mb: 256
+    timeout_seconds: 60
+    triggers:
+      sns: [orders]
+
+api_gateway:
+  routes:
+    - path: /api/users
+      function: users
+    - path: /api/reports
+      function: reports
