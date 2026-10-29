@@ -1,8 +1,8 @@
 # sigmoid_cdk
 
-Reusable internal Python package that turns a short YAML (or Python) config into a secure
-AWS stack built with the AWS CDK. One stack can hold **any number of Lambdas, S3 buckets and SNS
-topics**.
+Reusable internal Python package that turns a short python config into a secure
+AWS stack built with the AWS CDK. One stack can hold any number of Lambdas, S3 buckets and SNS
+topics.
 
 | Shape | Config | Creates |
 | --- | --- | --- |
