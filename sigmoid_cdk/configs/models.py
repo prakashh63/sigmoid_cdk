@@ -143,6 +143,13 @@ def _as_dict(value: Any) -> dict[str, Any]:
     return value.model_dump() if isinstance(value, BaseModel) else dict(value)
 
 
+class AwsEnvConfig(_Strict):
+    """Optional override. Leave a field out to use the CLI's account / region."""
+
+    account: str | None = Field(default=None, pattern=r"^\d{12}$")  # quote it in YAML
+    region: str | None = Field(default=None, pattern=r"^[a-z]{2}(-[a-z]+)+-\d$")
+
+
 class WebAppConfig(_Strict):
     """Top-level configuration for ServerlessWebAppStack."""
 
@@ -151,6 +158,7 @@ class WebAppConfig(_Strict):
     owner_team: str = Field(min_length=1)
     cost_center: str | None = None
     encrypt_logs: bool = True
+    aws: AwsEnvConfig | None = None
     buckets: dict[ResourceKey, S3Config] = Field(default_factory=dict)
     topics: dict[ResourceKey, TopicConfig] = Field(default_factory=dict)
     lambdas: dict[ResourceKey, LambdaConfig] = Field(min_length=1)

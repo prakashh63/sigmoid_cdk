@@ -2,10 +2,9 @@
 
 from typing import Any
 
-
-from aws_cdk import Aspects, CfnOutput, Stack
-from aws_cdk import aws_sns as sns
+from aws_cdk import Aspects, CfnOutput, Environment, Stack
 from aws_cdk import aws_s3 as s3
+from aws_cdk import aws_sns as sns
 from constructs import Construct
 
 from ..aspects import TaggingAspect, enable_compliance_checks
@@ -19,6 +18,7 @@ from ..constructs import (
     WebDistribution,
 )
 from ..constructs._common import env_key, pascal
+from ._environment import resolve_environment
 
 
 class ServerlessWebAppStack(Stack):
@@ -33,7 +33,16 @@ class ServerlessWebAppStack(Stack):
         enable_compliance: bool = True,
         **kwargs: Any,
     ) -> None:
-        super().__init__(scope, construct_id, **kwargs)
+        # Account / region, first match wins per field:
+        #   1. env= passed to this stack   2. the config's `aws` block
+        #   3. CDK_DEFAULT_ACCOUNT / CDK_DEFAULT_REGION (set by the CDK CLI from your login)
+        explicit_env: Environment | None = kwargs.pop("env", None)
+        super().__init__(
+            scope,
+            construct_id,
+            env=resolve_environment(config.aws, explicit_env),
+            **kwargs,
+        )
         self.config = config
         environment = config.environment
 

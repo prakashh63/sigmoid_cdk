@@ -403,3 +403,29 @@ def test_missing_code_folder_names_the_lambda(tmp_path: Path) -> None:
     )
     with pytest.raises(FileNotFoundError, match="Lambda code folder not found for 'main'"):
         load_config(path)
+
+
+def test_aws_block_is_optional_and_validated() -> None:
+    data = valid_data()
+    assert WebAppConfig.model_validate(data).aws is None
+    data["aws"] = {"account": "123456789012", "region": "ap-south-1"}
+    config = WebAppConfig.model_validate(data)
+    assert config.aws is not None
+    assert config.aws.region == "ap-south-1"
+
+
+@pytest.mark.parametrize(
+    "aws",
+    [
+        {"account": "1234"},
+        {"account": 123456789012},  # unquoted YAML number
+        {"region": "Mumbai"},
+        {"region": "ap-south"},
+        {"profile": "dev"},  # unknown field
+    ],
+)
+def test_bad_aws_block_rejected(aws: dict[str, object]) -> None:
+    data = valid_data()
+    data["aws"] = aws
+    with pytest.raises(ValidationError):
+        WebAppConfig.model_validate(data)
