@@ -1,0 +1,4 @@
+# Generate the real lock file on a machine with network access:
+#   pip install pip-tools
+#   pip-compile --extra dev --output-file requirements.lock pyproject.toml
+# CI installs from pyproject.toml until this file is generated and committed.

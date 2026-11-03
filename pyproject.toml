@@ -1,0 +1,50 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sigmoid-cdk"
+version = "0.1.0"
+description = "Internal AWS CDK framework: secure-by-default serverless web application stacks."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "aws-cdk-lib>=2.170.0,<3.0.0",
+    "constructs>=10.3.0,<11.0.0",
+    "cdk-nag>=2.34.0,<3.0.0",
+    "pydantic>=2.6,<3.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "syrupy>=4.6",
+    "mypy>=1.10",
+    "ruff>=0.5",
+    "build>=1.2",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+sigmoid_cdk = ["py.typed"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src", "tools"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+mypy_path = "src"
+plugins = ["pydantic.mypy"]
+files = ["src/sigmoid_cdk", "tools"]
+
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "UP", "B"]
+ignore = ["E501"]  # line length is handled by `ruff format`
+
+[tool.ruff.lint.per-file-ignores]
+"examples/local_server.py" = ["N803"]  # fake S3 mimics boto3's CamelCase argument names

@@ -1,0 +1,10 @@
+{
+  "app": "python3 examples/app.py",
+  "context": {
+    "sigmoid:compliance-checks": true,
+    "sigmoid:iam-guardrails": true,
+    "@aws-cdk/aws-lambda:recognizeLayerVersion": true,
+    "@aws-cdk/aws-iam:minimizePolicies": true,
+    "@aws-cdk/aws-s3:createDefaultLoggingPolicy": true
+  }
+}
